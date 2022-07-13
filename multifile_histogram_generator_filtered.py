@@ -148,7 +148,7 @@ class LoadData:
 # =============================================================================
 
 
-user_dir = r'C:\Users\jfarnese\Danaher\PLL PNI Engineering - Documents\\'
+user_dir = r'C:\Users\jgee\Danaher\PLL PNI Engineering - Documents\\'
 folder = r'\02.0 Projects\Blaze Project\2.0 Testing\ENG-000673 Blaze Testing\Blaze Testing - July 2022\Data Analysis in Python\CSV Files\\'
 plot_folder = r'02.0 Projects\Blaze Project\2.0 Testing\ENG-000673 Blaze Testing\Blaze Testing - July 2022\Data Analysis in Python\Statistic Plots\\'
 parent_path = user_dir + folder + '\\'
