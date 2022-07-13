@@ -37,9 +37,11 @@ class LoadData:
         self.df['Filtered Center Flow Rate'] = self.df['Center Flow Rate']
         self.df['Filtered Right Flow Rate'] = self.df['Right Flow Rate']
 
+
 # =============================================================================
 # Functions
 # =============================================================================
+
 
         def calc_absolute_percent_error(data, target):
             pe = abs((data - target) / target * 100)
@@ -84,23 +86,63 @@ class LoadData:
         # rename the last index as percentile
         self.stats.rename({self.stats.index[-1]: "99%"}, inplace=True)
 
-
 # =============================================================================
 # Getting rid of spikes
 # =============================================================================
 # removing erroneous values to properly plot FRR stats
 
-        self.df['Filtered Center Flow Rate'][self.df['Filtered Center Flow Rate'] < 2 *
-                                             d1_stat['Center Flow Rate']['std']] = self.df['Center Flow Rate'].mean()
-        self.df['Filtered Center Flow Rate'][self.df['Filtered Center Flow Rate'] > 2 *
-                                             d1_stat['Center Flow Rate']['std']] = self.df['Center Flow Rate'].mean()
+        self.df['Filtered Center Flow Rate'][self.df['Filtered Center Flow Rate'] < ((self.df['Center Flow Rate'].mean(
+        )-self.df['Center Flow Rate'].skew()) - 1 * self.df['Center Flow Rate'].std())] = self.df['Center Flow Rate'].mean()-self.df['Center Flow Rate'].skew()
+        self.df['Filtered Center Flow Rate'][self.df['Filtered Center Flow Rate'] > ((self.df['Center Flow Rate'].mean(
+        )-self.df['Center Flow Rate'].skew()) + 1 * self.df['Center Flow Rate'].std())] = self.df['Center Flow Rate'].mean()-self.df['Center Flow Rate'].skew()
 
-    #     # repeat for the right flow rate
-        self.df['Filtered Right Flow Rate'][self.df['Filtered Right Flow Rate'] < 2 *
-                                            d1_stat['Right Flow Rate']['std']] = self.df['Right Flow Rate'].mean()
-        self.df['Filtered Right Flow Rate'][self.df['Filtered Right Flow Rate'] > 2 *
-                                            d1_stat['Right Flow Rate']['std']] = self.df['Right Flow Rate'].mean()
+        self.df['Filtered Right Flow Rate'][self.df['Filtered Right Flow Rate'] < ((self.df['Right Flow Rate'].mean(
+        )-self.df['Right Flow Rate'].skew()) - 1 * self.df['Right Flow Rate'].std())] = self.df['Right Flow Rate'].mean()-self.df['Right Flow Rate'].skew()
+        self.df['Filtered Right Flow Rate'][self.df['Filtered Right Flow Rate'] > ((self.df['Right Flow Rate'].mean(
+        )-self.df['Right Flow Rate'].skew()) + 1 * self.df['Right Flow Rate'].std())] = self.df['Right Flow Rate'].mean()-self.df['Right Flow Rate'].skew()
 
+        # self.df['Filtered Center Flow Rate'][self.df['Filtered Center Flow Rate'] > self.df['Center Flow Rate'].mean() + 2 *
+        #                                       self.d1_stat['Center Flow Rate']['std']] = self.df['Center Flow Rate'].mean()
+
+    # #     # repeat for the right flow rate
+    #     self.df['Filtered Right Flow Rate'][self.df['Filtered Right Flow Rate'] < 2 *
+    #                                         d1_stat['Right Flow Rate']['std']] = self.df['Right Flow Rate'].mean()
+    #     self.df['Filtered Right Flow Rate'][self.df['Filtered Right Flow Rate'] > 2 *
+    #                                         d1_stat['Right Flow Rate']['std']] = self.df['Right Flow Rate'].mean()
+
+# =============================================================================
+# Statistics
+# =============================================================================
+        # create stats dataframe
+        self.stats = self.df.describe()
+
+        # self.stats.loc[len(self.df.index)] = self.df.median()   #add the median to the last row for all columns
+        self.stats.rename(index={'50%': "median"}, inplace=True)  # rename the last index as median
+
+        # add the variance to the last row for all columns
+        self.stats.loc[len(self.df.index)] = self.df.var()
+        # rename the last index as variance
+        self.stats.rename({self.stats.index[-1]: "variance"}, inplace=True)
+
+        # add the variance to the last row for all columns
+        self.stats.loc[len(self.df.index)] = self.df.skew()
+        # rename the last index as variance
+        self.stats.rename({self.stats.index[-1]: "skew"}, inplace=True)
+
+        # add the percentile to the last row for all columns
+        self.stats.loc[len(self.df.index)] = self.df.quantile(0.95)
+        # rename the last index as percentile
+        self.stats.rename({self.stats.index[-1]: "95%"}, inplace=True)
+
+        # add the percentile to the last row for all columns
+        self.stats.loc[len(self.df.index)] = self.df.quantile(0.98)
+        # rename the last index as percentile
+        self.stats.rename({self.stats.index[-1]: "98%"}, inplace=True)
+
+        # add the percentile to the last row for all columns
+        self.stats.loc[len(self.df.index)] = self.df.quantile(0.99)
+        # rename the last index as percentile
+        self.stats.rename({self.stats.index[-1]: "99%"}, inplace=True)
 # =============================================================================
 # Path to folder with CSV files
 # =============================================================================
@@ -285,7 +327,7 @@ for i, val in enumerate(csv_filelist):
                bins=60, ax=ax8, alpha=0.5, rwidth=0.9)
     # d1_df.hist(column='FRRfiltered', color='cyan', bins=60, ax=ax5, alpha=0.8, rwidth=0.9)
     ax8.axvline(x=d1_stat['Filtered Right Flow Rate']['mean'], color='cyan', linestyle='--',
-                alpha=1, label="\u03BC =" + str(round(d1_stat['Filtereed Right Flow Rate']['mean'], 4)))
+                alpha=1, label="\u03BC =" + str(round(d1_stat['Filtered Right Flow Rate']['mean'], 4)))
 
     ax8.axvline(x=(d1_stat['Filtered Right Flow Rate']['mean'] + 2*d1_stat['Filtered Right Flow Rate']['std']), ymax=0.3, color='cyan', linestyle='--',
                 alpha=1, label="\u03BC +" + "2\u03C3 = " + "\u03BC + " + str(round(2*d1_stat['Right Flow Rate']['std'], 4)))
