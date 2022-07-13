@@ -33,13 +33,9 @@ class LoadData:
 
         self.fname = fname
         self.df = pd.read_csv(parent_path + fname, skiprows=([1, 2]))  # skipped row with units
-        # removing erroneous values to properly plot FRR stats
-        # self.df['Aqueous Flow Rate'][self.df['Aqueous Flow Rate']
-        #                              < 5] = self.df['Aqueous Flow Rate'].mean()
-        # # # removing erroneous values to properly plot FRR stats
-        # self.df['Organic Flow Rate'][self.df['Organic Flow Rate']
-        #                              < 5] = self.df['Organic Flow Rate'].mean()
-        # self.df = self.df.rename({'Center Flow Rate': 'Aqueous Flow Rate', 'Right Flow Rate': 'Organic Flow Rate', 'OrgFlow_proto_': 'org_fr', 'ORGpressure': 'org_pressure'}, axis=1)    #rename column headers
+
+        self.df['Filtered Center Flow Rate'] = self.df['Center Flow Rate']
+        self.df['Filtered Right Flow Rate'] = self.df['Right Flow Rate']
 
 # =============================================================================
 # Functions
@@ -54,26 +50,6 @@ class LoadData:
             return pe
 
 
-# =============================================================================
-# Derived Values
-# =============================================================================
-        # self.df['FRR'] = self.df['Aqueous Flow Rate']/self.df['Organic Flow Rate']
-        # self.df['TFR'] = self.df['Aqueous Flow Rate'] + self.df['Organic Flow Rate']
-        # self.df['FRR percent error'] = calc_percent_error(self.df['FRR'], self.df['FRR'].mean())
-        # self.df['absolute FRR percent error'] = calc_absolute_percent_error(
-        #     self.df['FRR'], self.df['FRR'].mean())
-
-        # sos = signal.butter(2, 40, fs=1000, output='sos')
-        # self.df['Aqeuousflowfiltered'] = signal.sosfilt(sos, self.df['Aqueous Flow Rate'])
-        # self.df['Organicflowfiltered'] = signal.sosfilt(sos, self.df['Organic Flow Rate'])
-        # self.df['FRRfiltered'] = self.df['Aqeuousflowfiltered']/self.df['Organicflowfiltered']
-        # self.df['FRRfiltered percent error'] = calc_percent_error(
-        #     self.df['FRRfiltered'], self.df['FRRfiltered'].mean())
-        # self.df['absolute FRRfiltered percent error'] = calc_absolute_percent_error(
-        #     self.df['FRRfiltered'], self.df['FRRfiltered'].mean())
-
-        # self.df['AqueousPresfiltered'] = signal.sosfilt(sos, self.df['Aqueous Pressure'])
-        # self.df['OrganicPresfiltered'] = signal.sosfilt(sos, self.df['Organic Pressure'])
 # =============================================================================
 # Statistics
 # =============================================================================
@@ -113,22 +89,24 @@ class LoadData:
 # Getting rid of spikes
 # =============================================================================
 # removing erroneous values to properly plot FRR stats
-        self.df['Filtered Center Flow Rate'][self.df['Center Flow Rate'] < 2 *
-                                              d1_stat['Center Flow Rate']['std']] = self.df['Center Flow Rate'].mean()
+
+        self.df['Filtered Center Flow Rate'][self.df['Filtered Center Flow Rate'] < 2 *
+                                             d1_stat['Center Flow Rate']['std']] = self.df['Center Flow Rate'].mean()
         self.df['Filtered Center Flow Rate'][self.df['Filtered Center Flow Rate'] > 2 *
-                                    d1_stat['Center Flow Rate']['std']] = self.df['Center Flow Rate'].mean()
+                                             d1_stat['Center Flow Rate']['std']] = self.df['Center Flow Rate'].mean()
 
     #     # repeat for the right flow rate
-        self.df['Filtered Right Flow Rate'][self.df['Right Flow Rate'] < 2 *
-                                          d1_stat['Right Flow Rate']['std']] = self.df['Right Flow Rate'].mean()
+        self.df['Filtered Right Flow Rate'][self.df['Filtered Right Flow Rate'] < 2 *
+                                            d1_stat['Right Flow Rate']['std']] = self.df['Right Flow Rate'].mean()
         self.df['Filtered Right Flow Rate'][self.df['Filtered Right Flow Rate'] > 2 *
-                                d1_stat['Right Flow Rate']['std']] = self.df['Right Flow Rate'].mean()
+                                            d1_stat['Right Flow Rate']['std']] = self.df['Right Flow Rate'].mean()
 
 # =============================================================================
 # Path to folder with CSV files
 # =============================================================================
 
-user_dir = r'C:\Users\jgee\Danaher\PLL PNI Engineering - Documents\\'
+
+user_dir = r'C:\Users\jfarnese\Danaher\PLL PNI Engineering - Documents\\'
 folder = r'\02.0 Projects\Blaze Project\2.0 Testing\ENG-000673 Blaze Testing\Blaze Testing - July 2022\Data Analysis in Python\CSV Files\\'
 plot_folder = r'02.0 Projects\Blaze Project\2.0 Testing\ENG-000673 Blaze Testing\Blaze Testing - July 2022\Data Analysis in Python\Statistic Plots\\'
 parent_path = user_dir + folder + '\\'
@@ -253,12 +231,12 @@ for i, val in enumerate(csv_filelist):
  # =============================================================================
  #     # Filtered Flow rate Center Flow Rate
  # =============================================================================
-        
+
     # d1_df.plot('Time', 'Aqueous Flow Rate', color='lime', ax=ax3, alpha=0.5,
     #            label='\u03BC = ' + str(round(d1_stat['Aqueous Flow Rate']['mean'], 2)) + ' mL/min')
 
     d1_df.plot('Time', 'Filtered Center Flow Rate', color='orange', ax=ax5, alpha=1,
-                   label='\u03BC = ' + str(round(d1_stat['Filtered Center Flow Rate']['mean'], 2)) + ' mL/min')
+               label='\u03BC = ' + str(round(d1_stat['Filtered Center Flow Rate']['mean'], 2)) + ' mL/min')
     ax5.set_xlabel('Time (s)')
     ax5.set_ylabel('Flow Rate (mL/min)')
     ax5.set_title('Filtered Center Flow Rate')
@@ -274,7 +252,7 @@ for i, val in enumerate(csv_filelist):
     #            label='\u03BC = ' + str(round(d1_stat['Organic Flow Rate']['mean'], 2)) + ' mL/min')
 
     d1_df.plot('Time', 'Filtered Right Flow Rate', color='cyan', ax=ax6, alpha=1,
-                   label='\u03BC = ' + str(round(d1_stat['Filtered Right Flow Rate']['mean'], 2)) + ' mL/min')
+               label='\u03BC = ' + str(round(d1_stat['Filtered Right Flow Rate']['mean'], 2)) + ' mL/min')
     ax6.set_xlabel('Time (s)')
     ax6.set_title('Filtered Right Flow Rate')
     ax6.legend(loc='right')
@@ -286,7 +264,8 @@ for i, val in enumerate(csv_filelist):
 #     # Filtered Center Flow Rate Histogram
 # =============================================================================
 
-    d1_df.hist(column='Filtered Center Flow Rate', color='orange', bins=60, ax=ax7, alpha=0.5, rwidth=0.9)
+    d1_df.hist(column='Filtered Center Flow Rate', color='orange',
+               bins=60, ax=ax7, alpha=0.5, rwidth=0.9)
     # d1_df.hist(column='FRRfiltered', color='cyan', bins=60, ax=ax5, alpha=0.8, rwidth=0.9)
     ax7.axvline(x=d1_stat['Filtered Center Flow Rate']['mean'], color='orange', linestyle='--',
                 alpha=1, label="\u03BC =" + str(round(d1_stat['Filtered Center Flow Rate']['mean'], 4)))
@@ -302,7 +281,8 @@ for i, val in enumerate(csv_filelist):
 #     # Filtered Right Flow Rate Histogram
 # =============================================================================
 
-    d1_df.hist(column='Filtered Right Flow Rate', color='violet', bins=60, ax=ax8, alpha=0.5, rwidth=0.9)
+    d1_df.hist(column='Filtered Right Flow Rate', color='violet',
+               bins=60, ax=ax8, alpha=0.5, rwidth=0.9)
     # d1_df.hist(column='FRRfiltered', color='cyan', bins=60, ax=ax5, alpha=0.8, rwidth=0.9)
     ax8.axvline(x=d1_stat['Filtered Right Flow Rate']['mean'], color='cyan', linestyle='--',
                 alpha=1, label="\u03BC =" + str(round(d1_stat['Filtereed Right Flow Rate']['mean'], 4)))
@@ -313,101 +293,9 @@ for i, val in enumerate(csv_filelist):
     ax8.set_ylabel('Bin Size')
     ax8.set_title('Filtered Right Flow Rate')
     ax8.legend(loc='right')
-    
-    
-# =============================================================================
-#     # pressure AQ
-# =============================================================================
-
-    # # d1_df.plot('Time', 'Aqueous Pressure', color='magenta', ax=ax1, label='\u03BC = ' +
-    # #            str(round(d1_stat['Aqueous Pressure']['mean'], 2)) + 'psi')
-    # d1_df.plot('Time', 'AqueousPresfiltered', color='magenta', ax=ax1, label='\u03BC = ' +
-    #            str(round(d1_stat['AqueousPresfiltered']['mean'], 2)) + 'psi')
-    # ax1.set_xlabel('')
-    # ax1.set_ylabel('Pressure (psi)')
-    # ax1.legend(loc='right')
-    # ax1.set_title('Aqueous')
-    # ax1.set_xlim(fr_zoom)
-
-# =============================================================================
-#     # pressure ORG
-# =============================================================================
-
-    # # d1_df.plot('Time', 'Organic Pressure', color='magenta', ax=ax2, label='\u03BC = ' +
-    # #            str(round(d1_stat['Organic Pressure']['mean'], 2)) + 'psi')
-    # d1_df.plot('Time', 'OrganicPresfiltered', color='magenta', ax=ax2, label='\u03BC = ' +
-    #            str(round(d1_stat['OrganicPresfiltered']['mean'], 2)) + 'psi')
-    # ax2.set_xlabel('')
-    # ax2.legend(loc='right')
-    # ax2.set_title('Organic')
-    # ax2.set_xlim(fr_zoom)
-    
-    
-# =============================================================================
-#     # FRR hist
-# =============================================================================
-    # # d1_df.hist(column='FRR', color='orange', bins=60, ax=ax5, alpha=0.5, rwidth=0.9)
-    # d1_df.hist(column='FRRfiltered', color='cyan', bins=60, ax=ax5, alpha=0.8, rwidth=0.9)
-    # ax5.axvline(x=d1_stat['FRRfiltered']['mean'], color='lime', linestyle='--',
-    #             alpha=1, label="\u03BC =" + str(round(d1_stat['FRRfiltered']['mean'], 4)))
-    # ax5.axvline(x=(d1_stat['FRRfiltered']['mean'] + 2*d1_stat['FRRfiltered']['std']), ymax=0.3, color='red', linestyle='--',
-    #             alpha=1, label="\u03BC +" + "2\u03C3 = " + "\u03BC + " + str(round(2*d1_stat['FRRfiltered']['std'], 4)))
-    # ax5.set_xlabel('FRR')
-    # ax5.set_ylabel('Bin Size')
-    # ax5.set_title('FRRfiltered')
-    # ax5.legend(loc='right')
-
-# =============================================================================
-#     # Error hist
-# =============================================================================
-    # # d1_df.hist(column='absolute FRR percent error', color='orange',
-    # #            alpha=0.5, bins=60, ax=ax6, rwidth=0.9)
-    # d1_df.hist(column='absolute FRRfiltered percent error', color='cornflowerblue',
-    #            alpha=1, bins=60, ax=ax6, rwidth=0.9)
-
-    # ax6.axvline(x=d1_stat['absolute FRRfiltered percent error']['95%'], color='lime', linestyle='--',
-    #             alpha=1, label="95th = " + str(round(d1_stat['absolute FRRfiltered percent error']['95%'], 3))+"%")
-    # ax6.axvline(x=(d1_stat['absolute FRRfiltered percent error']['99%']), color='red', linestyle='--',
-    #             alpha=1, label="99th = " + str(round(d1_stat['absolute FRRfiltered percent error']['99%'], 3))+"%")
-    # ax6.set_xlabel('% Error')
-    # ax6.set_xlim(0, 40)
-    # ax6.legend(loc='right')
-    # ax6.set_title('FRRfiltered Error from \u03BC')
-
-# =============================================================================
-#     # FRR plot
-# =============================================================================
-    # d1_df.plot('Time', 'FRRfiltered', color='cyan', ax=ax7, alpha=0.8, label='FRR')
-    # ax7.axhline(y=d1_stat['FRRfiltered']['mean'], color='white', label='\u03BC', linestyle='--')
-    # ax7.set_ylabel('FRRfiltered')
-    # ax7.legend(loc='upper right')
-
-# =============================================================================
-# Pressure histograms
-# =============================================================================
-
-    # d1_df.hist(column='AqueousPresfiltered', color='orange', bins=60, ax=ax7, alpha=1, rwidth=0.9)
-    # d1_df.hist(column='OrganicPresfiltered', color='cyan', bins=60, ax=ax7, alpha=0.5, rwidth=0.9)
-    # ax7.axvline(x=d1_stat['AqueousPresfiltered']['mean'], color='orange', linestyle='--',
-    #             alpha=1, label="Aq,\u03BC =" + str(round(d1_stat['AqueousPresfiltered']['mean'], 4)))
-    # ax7.axvline(x=d1_stat['OrganicPresfiltered']['mean'], color='cyan', linestyle='--',
-    #             alpha=1, label="Org,\u03BC =" + str(round(d1_stat['OrganicPresfiltered']['mean'], 4)))
-    # # ax5.set_xlabel('Pressure')
-    # ax7.set_ylabel('Bin Size')
-    # ax7.set_title('Pressure')
-    # ax7.legend(loc='right')
 
     # fig.savefig(save_path + csv_filelist[i][:-4] + '.png')
 
     print(csv_filelist[i])
-    # print(d1_df['FRRfiltered'].mean())
-    # print(d1_stat['absolute FRRfiltered percent error']['95%'])
-    # print(d1_stat['absolute FRRfiltered percent error']['99%'])
-    # print(2*d1_stat['FRRfiltered']['std'])
-    # print(d1_df['Aqeuousflowfiltered'].mean())
-    # print(d1_df['Organicflowfiltered'].mean())
-
-    # print(d1_df['AqueousPresfiltered'].mean())
-    # print(d1_df['OrganicPresfiltered'].mean())
 
     plt.show()
